@@ -1,0 +1,85 @@
+import random
+
+# Datos Maestros
+categorias_opciones = ["Hombre", "Mujer", "Niño", "Niña", "Adolescente"]
+marcas_opciones = ["Nike", "Adidas", "New Balance", "Asics"]
+colores_opciones = ["Negro", "Blanco", "Azul", "Rosa", "Gris", "Rojo", "Verde"]
+
+def mostrar_menu(titulo, lista):
+    print(f"\n--- {titulo} ---")
+    for i, opcion in enumerate(lista, 1):
+        print(f"{i}. {opcion}")
+    while True:
+        try:
+            res = int(input("Seleccione el número de su opción: "))
+            if 1 <= res <= len(lista):
+                return lista[res-1]
+            else:
+                print(f"Error: Elija un número entre 1 y {len(lista)}.")
+        except ValueError:
+            print("Error: Ingrese solo números.")
+
+def generar_inventario():
+    inventario = {}
+    rangos = {
+        "Hombre": range(37, 43), "Mujer": range(37, 43),
+        "Niño": range(24, 37), "Niña": range(24, 37),
+        "Adolescente": range(35, 39)
+    }
+    for cat in categorias_opciones:
+        inventario[cat] = {}
+        for marca in marcas_opciones:
+            inventario[cat][marca] = {}
+            for talla in rangos[cat]:
+                inventario[cat][marca][talla] = {
+                    "color_disponible": random.choice(colores_opciones),
+                    "en_stock": random.choice([True, False])
+                }
+    return inventario
+
+def programa_gestion():
+    db_arbol = generar_inventario()
+    
+    while True: # Bucle principal para volver al menú
+        print("\n" + "="*40)
+        print("   SISTEMA DE GESTIÓN DE ZAPATOS")
+        print("="*40)
+
+        cat_elegida = mostrar_menu("SELECCIONE GÉNERO", categorias_opciones)
+        marca_elegida = mostrar_menu("SELECCIONE MARCA", marcas_opciones)
+        
+        print(f"\n--- TALLA ({cat_elegida}) ---")
+        try:
+            talla_elegida = int(input("Ingrese el número de talla: "))
+        except ValueError:
+            print("Talla no válida. Reiniciando...")
+            continue
+
+        color_usuario = mostrar_menu("SELECCIONE COLOR DESEADO", colores_opciones)
+
+        # Lógica de Verificación (Árbol de Decisión)
+        print("\nVerificando disponibilidad...")
+        
+        if talla_elegida in db_arbol[cat_elegida][marca_elegida]:
+            nodo = db_arbol[cat_elegida][marca_elegida][talla_elegida]
+            
+            # Verificamos si el color coincide y hay stock
+            if color_usuario == nodo["color_disponible"] and nodo["en_stock"]:
+                print("✅ ¡ÉXITO! Talla y color disponibles. Agregado al carrito.")
+            elif color_usuario != nodo["color_disponible"]:
+                print(f"❌ COLOR AGOTADO. (Solo disponible en: {nodo['color_disponible']})")
+            else:
+                print("❌ TALLA AGOTADA (Sin stock físico en este momento).")
+        else:
+            print("❌ TALLA AGOTADA (No se fabrica para esta categoría).")
+
+        # Opción de Salir o Volver al Menú
+        print("\n" + "-"*30)
+        opcion_final = mostrar_menu("¿DESEA REALIZAR OTRA OPERACIÓN?", ["Volver al menú", "Salir del programa"])
+        
+        if opcion_final == "Salir del programa":
+            print("\nGracias por usar el sistema. ¡Hasta luego!")
+            break # Rompe el bucle while y termina el programa
+
+if __name__ == "__main__":
+    programa_gestion() 
